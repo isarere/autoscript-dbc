@@ -138,7 +138,7 @@ public class AddUpdateAutoScriptStatement extends ChangeStatement {
                 autoscript.startsWith("OSACTION.") ||
                 autoscript.startsWith("PUBLISH.") ||
                 autoscript.startsWith("SYNC.") ||
-                autoscript.startsWith("INVOKE.");
+                autoscript.startsWith("INVOKE.") || config.allowInvokingScriptFunctions;
 
         is.addColumnValue("interface", isInterface);
 

@@ -32,7 +32,7 @@ public class RemoveAutoScriptStatement extends ChangeStatement {
      */
     @Override
     public String toString() {
-        String autoscript = getString("autoscript");
+        String autoscript = getString("name");
         return "remove_autoscript " + ((autoscript != null && !autoscript.isEmpty()) ? autoscript : "<null>");
     }
 
@@ -46,14 +46,15 @@ public class RemoveAutoScriptStatement extends ChangeStatement {
      */
     @Override
     public void validate() throws Exception {
-        requiredValue("autoscript");
+        requiredValue("name");
     }
 
     /**
-     * Removes the automation script specified in the "autoscript" attribute.
+     * Removes the automation script specified in the "name" attribute.
      * The automation script removal includes removing references from the following objects.
      * <ul>
      *   <li>action</li>
+     *   <li>actiongroup</li>
      *   <li>autoscript</li>
      *   <li>scriptlaunchpoint</li>
      *   <li>launchpointvars</li>
@@ -74,13 +75,15 @@ public class RemoveAutoScriptStatement extends ChangeStatement {
     public void run() throws Exception {
         validate();
 
-        String whereSql = StringUtility.replaceAll("upper(autoscript) = '<AUTOSCRIPT>' ", "<AUTOSCRIPT>", getString("autoscript").toUpperCase());
+        String whereSql = StringUtility.replaceAll("upper(autoscript) = '<AUTOSCRIPT>' ", "<AUTOSCRIPT>", getString("name").toUpperCase());
 
-        String scriptWhereSql = StringUtility.replaceAll("upper(scriptname) = '<AUTOSCRIPT>' ", "<AUTOSCRIPT>", getString("autoscript").toUpperCase());
+        String scriptWhereSql = StringUtility.replaceAll("upper(scriptname) = '<AUTOSCRIPT>' ", "<AUTOSCRIPT>", getString("name").toUpperCase());
 
-        String actionWhereSql = StringUtility.replaceAll("upper(action) in (select launchpointname from scriptlaunchpoint where '<AUTOSCRIPT>') and value = 'com.ibm.tivoli.maximo.script.ScriptAction'", "<AUTOSCRIPT>", getString("autoscript").toUpperCase());
+        String actionWhereSql = StringUtility.replaceAll("upper(action) in (select launchpointname from scriptlaunchpoint where '<AUTOSCRIPT>') and value = 'com.ibm.tivoli.maximo.script.ScriptAction'", "<AUTOSCRIPT>", getString("name").toUpperCase());
+        String actionGrpWhereSql = StringUtility.replaceAll("upper(member) = '<AUTOSCRIPT>' ", "<AUTOSCRIPT>", getString("name").toUpperCase());
 
         doSql("delete from action where " + actionWhereSql);
+        doSql("delete from actiongroup where " + actionWhereSql);
 
         doSql("delete from autoscript where " + whereSql);
         doSql("delete from scriptlaunchpoint where " + whereSql);
